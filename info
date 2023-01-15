@@ -1,0 +1,56 @@
+Команды для Shell записаны в папке Scratches/scratch.cmdline
+
+python manage.py shell
+from news.models import *
+
+user1 = User.objects.create(username = 'Сергей')
+user2 = User.objects.create(username = 'Юля')
+auth1 = Author.objects.create(name = 'Костюхин Сергей Вячеславович', user = user1)
+auth2 = Author.objects.create(name = 'Грунина Юлия Игоревна', user = user2)
+cath1 = Category.objects.create(name = 'Финансы')
+cat2 = Category.objects.create(name = 'Политика')
+cat3 = Category.objects.create(name = 'Спорт')
+cat4 = Category.objects.create(name = 'Культура')
+post1 = Post.objects.create(author_id =1, option='news', header='Данные ООН показали 70%-ный рост доходов России от экспорта удобрений', text='За первые десять месяцев 2022 года российский экспорт удобрений подскочил на 70%, до $16,7 млрд, по сравнению с тем же периодом 2021 года, следует из данных Продовольственной и сельскохозяйственной организации ООН')
+post1.category.add(1)
+post1.category.add(2)
+post2 = Post.objects.create(author_id=2, option='news', header='Как прошел 71-й конкурс красоты "Мисс Вселенная"', text='В Новом Орлеане (штат Луизиана) состоялся финал 71-го конкурса «Мисс Вселенная». Обладательницей короны стала 28-летняя американка Р’Бонни Габриэл. Всего за титул боролись 84 девушки, россиянка не вошла в топ-16')
+post2.category.add(4)
+post3 = Post.objects.create(author_id=1, option='post', header='Николай II обожал спорт. Играл в теннис, катался на байдарке, а в ссылке смастерил турник', text='Николай II был очень спортивным человеком. Это следует из записей в его дневнике, воспоминаний современников и фотоархива. Император был прекрасным наездником, любил кататься на байдарке и велосипеде, играл в бадминтон и много ходил пешком. А больше всего увлекал его большой теннис: на протяжении почти всего своего правления Николай регулярно выходил на корт и, судя по всему, управлялся с ракеткой весьма недурно. После отречения, уже в ссылке в Тобольске, он не отказался от привычки вести активный образ жизни: сделал турник в саду и постоянно нагружал себя физическим трудом на свежем воздухе.')
+post3.category.add(3)
+comm1 = Comment.objects.create(post_id=1, user_id=2, comment='лучше бы дома оставили')
+comm2 = Comment.objects.create(post_id=2, user_id=1, comment='Не выиграли, потому что ты не участвовала!')
+comm3 = Comment.objects.create(post_id=2, user_id=2, comment='Подлиза..')
+comm4 = Comment.objects.create(post_id=3, user_id=2, comment='Вот с кого надо брать пример!')
+post = Post.objects.get(id=1)
+post.dislike()
+post2 = Post.objects.get(id=2)
+post.like()
+post2.like()
+Post.objects.get(id=3).like()
+Comment.objects.get(id=1).like()
+Comment.objects.get(id=2).dislike()
+Comment.objects.get(id=3).dislike()
+Comment.objects.get(id=4).like()
+Author.objects.get(id=1).update_rating()
+Author.objects.get(id=2).update_rating()
+
+best_user = Author.objects.all().order_by('-rating')[0]
+print(best_user.name, best_user.rating)
+
+from django.db.models import Max
+posts = Post.objects.annotate(Max('rating')).order_by('-rating__max')
+best_post = posts[0]
+
+print('Date: {}'.format(best_post.date))
+print('Author: {}'.format(best_post.author.name))
+print('Rating: {}'.format(best_post.rating))
+print('Header: {}'.format(best_post.header))
+print('Preview: {}'.format(best_post.preview()))
+
+comments = Comment.objects.filter(post=best_post)
+for comment in comments:
+print(f'Date: {comment.date}')
+print(f'User: {comment.user.username}')
+print(f'Rating: {comment.rating}')
+print(f'Text: {comment.comment}')
